@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta content="yes" name="apple-mobile-web-app-capable" />
+<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+<meta name="referrer" content="never">
+<meta name="keywords" content="">
+<meta name="description" content="欢迎访问[Edward&#39;s Blog]的个人博客">
+<meta name="author" content="kveln">
+<title>CODE REVIEW OF LANGUAGE TRANSLATION WITH NN.TRANSFORMER AND TORCHTEXT - PART 1 | Edward&#39;s Blog</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+<link
+  href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+  rel='stylesheet' type='text/css'>
+<link rel="alternate" type="application/rss+xml" title="CODE REVIEW OF LANGUAGE TRANSLATION WITH NN.TRANSFORMER AND TORCHTEXT - PART 1 | Edward&#39;s Blog » Feed"
+  href="https://edwardxliu.github.io/atom.xml">
+<link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+<link href="https://edwardxliu.github.io/styles/main.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/css/live2d.css">
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <meta property="og:description" content="CODE REVIEW OF LANGUAGE TRANSLATION WITH NN.TRANSFORMER AND TORCHTEXT - PART 1" />
+  <meta property="og:url" content="https://edwardxliu.github.io/post/code-review-of-language-translation-with-nntransformer-and-torchtext-part-1/" />
+  <meta property="og:locale" content="zh-CN" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Edward&#39;s Blog" />
+  <!-- <script src="../assets/styles/scripts/tocScript.js"></script> -->
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://edwardxliu.github.io">Edward&#39;s Blog</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="https://edwardxliu.github.io/post/guan-yu">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1659681269797"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+  <!-- Page Header -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://edwardxliu.github.io">Edward&#39;s Blog</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="https://edwardxliu.github.io/post/guan-yu">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1659681269797"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<header class="masthead" style="background-image: url('https://edwardxliu.github.io/media/images/home-bg.jpg')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        
+          <!-- 没Title为其他页面Header -->
+          
+            <!-- 没Title并且有headerType为Post：文章Header -->
+            <div class="post-heading">
+              <span class="tags">
+                
+              </span>
+              <h1>CODE REVIEW OF LANGUAGE TRANSLATION WITH NN.TRANSFORMER AND TORCHTEXT - PART 1</h1>
+              <span class="meta">
+                Posted on
+                2022-03-25，14 min read
+              </span>
+            </div>
+          
+        
+      </div>
+    </div>
+  </div>
+</header>
+  <!-- Post Content -->
+  <article id="post-content-article">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto post-content-container">
+          
+          <img class="post-feature-header-image" src="https://raw.githubusercontent.com/edwardxliu/Picbed_PicGo/main/nature88885_275888379_513217773574007_5031128704117757222_n.jpg" alt="封面图">
+          </img>
+          
+          <h1 id="data-sourcing-and-processing">Data Sourcing and Processing</h1>
+<p>The first part of the <a href="https://pytorch.org/tutorials/beginner/translation_transformer.html">source code</a> related to data processing is showed below.</p>
+<pre><code class="language-python">from torchtext.data.utils import get_tokenizer
+from torchtext.vocab import build_vocab_from_iterator
+from torchtext.datasets import Multi30k
+from typing import Iterable, List
+
+SRC_LANGUAGE = 'de'
+TGT_LANGUAGE = 'en'
+
+# Place-holders
+token_transform = {}
+vocab_transform = {}
+
+# Create source and target language tokenizer. Make sure to install the dependencies.
+# pip install -U spacy
+# python -m spacy download en_core_web_sm
+# python -m spacy download de_core_news_sm
+token_transform[SRC_LANGUAGE] = get_tokenizer('spacy', language='de_core_news_sm')
+token_transform[TGT_LANGUAGE] = get_tokenizer('spacy', language='en_core_web_sm')
+</code></pre>
+<p><code>token_transform</code> and <code>vocab_transform</code> are two dictionaries for storing the token transfomers of the source (German) and target (English) languages. The token transfomer <code>get_tokenizer</code> is a word-segmentation function for transferring a string sentence into a list of words and punctuation characters. The below piece of code shows an example of splitting a English sentence into a list of English words by spaces with the <code>basic_english</code> tokenizer.</p>
+<pre><code class="language-python">&gt;&gt;&gt; import torchtext
+&gt;&gt;&gt; from torchtext.data import get_tokenizer
+&gt;&gt;&gt; tokenizer = get_tokenizer(&quot;basic_english&quot;)
+&gt;&gt;&gt; tokens = tokenizer(&quot;You can now install TorchText using pip!&quot;)
+&gt;&gt;&gt; tokens
+&gt;&gt;&gt; ['you', 'can', 'now', 'install', 'torchtext', 'using', 'pip', '!']
+</code></pre>
+<p>Like the code presented before, the <code>get_tokenizer</code> function can also call other tokenizer libraries (e.g. spacy, moses, toktok, revtok, subword) if they are preinstalled. It should be noticed that the tokenizer from <code>spacy</code> performs better than the original <code>basic_english</code>. For example, we can do a comparison test like below showed.</p>
+<pre><code class="language-python">&gt;&gt;&gt; get_tokenizer(&quot;basic_english&quot;)(&quot;Let's go to N.Y.!&quot;)
+&gt;&gt;&gt; ['let', &quot;'&quot;, 's', 'go', 'to', 'n', '.', 'y', '.', '!']
+&gt;&gt;&gt; get_tokenizer(&quot;spacy&quot;, language=&quot;en_core_web_sm&quot;)(&quot;Let's go to N.Y.!&quot;)
+&gt;&gt;&gt; ['Let', &quot;'s&quot;, 'go', 'to', 'N.Y.', '!']
+</code></pre>
+<p>Moreover, I've also tested the performance of the spacy tokenizer on <strong>Chinese</strong>,  but the result showed below is worse than expected because <code>清华大学</code> should not be segmented.</p>
+<pre><code class="language-python">&gt;&gt;&gt; get_tokenizer(&quot;spacy&quot;, language=&quot;zh_core_web_sm&quot;)(&quot;我在清华大学读书。&quot;)
+&gt;&gt;&gt; ['我', '在', '清华', '大学', '读书', '。']
+</code></pre>
+<br />
+<details>
+<summary><font color=darkred>The details about the spacy tokenization</font></summary>
+<p>Tokenization is the task of splitting a text into meaningful segments, called tokens. The input to the tokenizer is a unicode text, and the output is a  <code>Doc</code> object. To construct a <code>Doc</code> object, you need a <code>Vocab</code> instance, a sequence of word strings, and optionally a sequence of <code>spaces</code> booleans, which allow you to maintain alignment of the tokens into the original string.<br /><br>
+During processing, spaCy first <strong>tokenizes</strong> the text, i.e. segments it into words, punctuation and so on. This is done by applying rules specific to each language. For example, punctuation at the end of a sentence should be split off – whereas “U.K.” should remain one token. Each <code>Doc</code> consists of individual tokens, and we can iterate over them:</p>
+<pre><code class="language-python">&gt;&gt;&gt; import spacy
+&gt;&gt;&gt; nlp = spacy.load(&quot;en_core_web_sm&quot;)
+&gt;&gt;&gt; doc = nlp(&quot;Apple is looking at buying U.K. startup for $1 billion&quot;)
+&gt;&gt;&gt; for token in doc:
+&gt;&gt;&gt;     print(token.text)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">0</th>
+<th style="text-align:center">1</th>
+<th style="text-align:center">2</th>
+<th style="text-align:center">3</th>
+<th style="text-align:center">4</th>
+<th style="text-align:center">5</th>
+<th style="text-align:center">6</th>
+<th style="text-align:center">7</th>
+<th style="text-align:center">8</th>
+<th style="text-align:center">9</th>
+<th style="text-align:center">10</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Apple</td>
+<td style="text-align:center">is</td>
+<td style="text-align:center">looking</td>
+<td style="text-align:center">at</td>
+<td style="text-align:center">buying</td>
+<td style="text-align:center">U.K.</td>
+<td style="text-align:center">startup</td>
+<td style="text-align:center">for</td>
+<td style="text-align:center">$</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">billion</td>
+</tr>
+<tr>
+<td style="text-align:center"><br /></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">First, the raw text is split on whitespace characters, similar to <code>text.split(' ')</code>. Then, the tokenizer processes the text from left to right. On each substring, it performs two checks:</td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>
+<p><strong>Does the substring match a tokenizer exception rule?</strong> For example, “don’t” does not contain whitespace, but should be split into two tokens, “do” and “n’t”, while “U.K.” should always remain one token.</p>
+</li>
+<li>
+<p><strong>Can a prefix, suffix or infix be split off?</strong> For example punctuation like commas, periods, hyphens or quotes.</p>
+</li>
+</ol>
+<p>If there’s a match, the rule is applied and the tokenizer continues its loop, starting with the newly split substrings. This way, spaCy can split <strong>complex, nested tokens</strong> like combinations of abbreviations and multiple punctuation marks.<br>
+<img src="https://spacy.io/tokenization-9b27c0f6fe98dcb26239eba4d3ba1f3d.svg#pic_center" alt="enter image description here" loading="lazy"><br>
+While punctuation rules are usually pretty general, tokenizer exceptions strongly depend on the specifics of the individual language. This is why each available language has its own subclass, like <code>English</code> or <code>German</code>, that loads in lists of hard-coded data and exception rules.<br /></p>
+<details>
+<summary><font color=darkred>Algorithm details: How spaCy's tokenizer works</font></summary>
+<p>spaCy introduces a novel tokenization algorithm that gives a better balance between performance, ease of definition and ease of alignment into the original string.<br /><br>
+After consuming a prefix or suffix, we consult the special cases again. We want the special cases to handle things like “don’t” in English, and we want the same rule to work for “(don’t)!“. We do this by splitting off the open bracket, then the exclamation, then the closed bracket, and finally matching the special case. Here’s an implementation of the algorithm in Python optimized for readability rather than performance:</p>
+<pre><code class="language-python">def tokenizer_pseudo_code(
+    text,
+    special_cases,
+    prefix_search,
+    suffix_search,
+    infix_finditer,
+    token_match,
+    url_match
+):
+    tokens = []
+    for substring in text.split():
+        suffixes = []
+        while substring:
+            while prefix_search(substring) or suffix_search(substring):
+                if token_match(substring):
+                    tokens.append(substring)
+                    substring = &quot;&quot;
+                    break
+                if substring in special_cases:
+                    tokens.extend(special_cases[substring])
+                    substring = &quot;&quot;
+                    break
+                if prefix_search(substring):
+                    split = prefix_search(substring).end()
+                    tokens.append(substring[:split])
+                    substring = substring[split:]
+                    if substring in special_cases:
+                        continue
+                if suffix_search(substring):
+                    split = suffix_search(substring).start()
+                    suffixes.append(substring[split:])
+                    substring = substring[:split]
+            if token_match(substring):
+                tokens.append(substring)
+                substring = &quot;&quot;
+            elif url_match(substring):
+                tokens.append(substring)
+                substring = &quot;&quot;
+            elif substring in special_cases:
+                tokens.extend(special_cases[substring])
+                substring = &quot;&quot;
+            elif list(infix_finditer(substring)):
+                infixes = infix_finditer(substring)
+                offset = 0
+                for match in infixes:
+                    if offset == 0 and match.start() == 0:
+                        continue
+                    tokens.append(substring[offset : match.start()])
+                    tokens.append(substring[match.start() : match.end()])
+                    offset = match.end()
+                if substring[offset:]:
+                    tokens.append(substring[offset:])
+                substring = &quot;&quot;
+            elif substring:
+                tokens.append(substring)
+                substring = &quot;&quot;
+        tokens.extend(reversed(suffixes))
+    for match in matcher(special_cases, text):
+        tokens.replace(match, special_cases[match])
+    return tokens
+</code></pre>
+<p>The algorithm can be summarized as follows:</p>
+<ol>
+<li>Iterate over space-separated substrings.</li>
+<li>Look for a token match. If there is a match, stop processing and keep this token.</li>
+<li>Check whether we have an explicitly defined special case for this substring. If we do, use it.</li>
+<li>Otherwise, try to consume one prefix. If we consumed a prefix, go back to #2, so that the token match and special cases always get priority.</li>
+<li>If we didn’t consume a prefix, try to consume a suffix and then go back to #2.</li>
+<li>If we can’t consume a prefix or a suffix, look for a URL match.</li>
+<li>If there’s no URL match, then look for a special case.</li>
+<li>Look for “infixes” – stuff like hyphens etc. and split the substring into tokens on all infixes.</li>
+<li>Once we can’t consume any more of the string, handle it as a single token.</li>
+<li>Make a final pass over the text to check for special cases that include spaces or that were missed due to the incremental processing of affixes.</li>
+</ol>
+<p><strong>Global</strong> and <strong>language-specific</strong> tokenizer data is supplied via the language data in <code>spacy/lang</code>. The tokenizer exceptions define special cases like “don’t” in English, which needs to be split into two tokens: <code>{ORTH: &quot;do&quot;}</code> and <code>{ORTH: &quot;n't&quot;, NORM: &quot;not&quot;}</code>. The prefixes, suffixes and infixes mostly define punctuation rules – for example, when to split off periods (at the end of a sentence), and when to leave tokens containing periods intact (abbreviations like “U.S.”).</p>
+</details>
+</details> <br />
+<p>The next part of the data processing code is basically a function for returning the list of tokens of a given sentence.</p>
+<pre><code class="language-python"># helper function to yield list of tokens
+def yield_tokens(data_iter: Iterable, language: str) -&gt; List[str]:
+    language_index = {SRC_LANGUAGE: 0, TGT_LANGUAGE: 1}
+
+    for data_sample in data_iter:
+        yield token_transform[language](data_sample[language_index[language]])
+</code></pre>
+<p>Since the input dataset <code>Multi30k</code> is composed with a series of tuples where each tuple contains two strings (one is in <strong>German</strong> and the other one is the corresponding translation in <strong>English</strong>, and the order of them can be switched via the parameter <code>language_pair</code>), the <code>language_index</code> is used to determine the indices of the elements in a tuple.  So if the input parameter <code>language = 'de'</code>, the <code>language_index[language]</code> will return <strong>0</strong>, and it will  return <strong>1</strong> if <code>language = 'en'</code> because of <code>language_index = {SRC_LANGUAGE: 0, TGT_LANGUAGE: 1}</code>. Therefore, <code>data_sample[language_index[language]]</code> in the for loop will traverse each tuple in the given dataset and be like <code>data_sample[0]</code> or <code>data_sample[1]</code> depending on the value of <code>language</code>, then returns the corresponding string sentences. After that, <code>token_transform[language]</code> will call corresponding tokenizer and transfer the sentence to a list of tokens.  The following code may help you understand the <code>yield_tokens</code> function.</p>
+<pre><code class="language-python">&gt;&gt;&gt; [i for i in Multi30k(split='valid', language_pair=('de', 'en'))][0]
+&gt;&gt;&gt; ('Eine Gruppe von Männern lädt Baumwolle auf einen Lastwagen', 'A group of men are loading cotton onto a truck')
+&gt;&gt;&gt; [i for i in Multi30k(split='valid', language_pair=('en', 'de'))][0]
+&gt;&gt;&gt; ('A group of men are loading cotton onto a truck', 'Eine Gruppe von Männern lädt Baumwolle auf einen Lastwagen')
+&gt;&gt;&gt;
+&gt;&gt;&gt; for data_sample in  Multi30k(split='valid', language_pair=('de', 'en')):
+...   print(data_sample[0], token_transform['de'](data_sample[0]))
+...   print(data_sample[1], token_transform['en'](data_sample[1]))
+...   break
+...
+&gt;&gt;&gt; Eine Gruppe von Männern lädt Baumwolle auf einen Lastwagen ['Eine', 'Gruppe', 'von', 'Männern', 'lädt', 'Baumwolle', 'auf', 'einen', 'Lastwagen']
+&gt;&gt;&gt; A group of men are loading cotton onto a truck ['A', 'group', 'of', 'men', 'are', 'loading', 'cotton', 'onto', 'a', 'truck']
+</code></pre>
+<p>The next part of the code is used to build two word dictionaries (<strong>German</strong> and <strong>English</strong>) in which each word is assigned with a <strong>unique integer</strong> (starting from 0 to the number of unique words in the given dataset). The words and their values will be used to build word vectors later.</p>
+<pre><code class="language-python"># Define special symbols and indices
+UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX = 0, 1, 2, 3
+# Make sure the tokens are in order of their indices to properly insert them in vocab
+special_symbols = ['&lt;unk&gt;', '&lt;pad&gt;', '&lt;bos&gt;', '&lt;eos&gt;']
+
+for ln in [SRC_LANGUAGE, TGT_LANGUAGE]:
+    # Training data Iterator
+    train_iter = Multi30k(split='train', language_pair=(SRC_LANGUAGE, TGT_LANGUAGE))
+    # Create torchtext's Vocab object
+    vocab_transform[ln] = build_vocab_from_iterator(yield_tokens(train_iter, ln),
+                                                    min_freq=1,
+                                                    specials=special_symbols,
+                                                    special_first=True)
+# Set UNK_IDX as the default index. This index is returned when the token is not found.
+# If not set, it throws RuntimeError when the queried token is not found in the Vocabulary.
+for ln in [SRC_LANGUAGE, TGT_LANGUAGE]:
+    vocab_transform[ln].set_default_index(UNK_IDX)                                                   
+</code></pre>
+<p>The <code>build_vocab_from_iterator</code> function will return a <code>Vocab</code> which is an object from <code>torchtext</code>.  We can use <code>get_stoi()</code> function to list all the keys and values in that object. Noticing that <code>specials</code> and <code>special_first</code> are set, which means the values of four <code>special_symbols</code> are set from 0 to 3 in the dictionary. We can also play around with the <code>Vocab</code> and do some checks related to the keys and values.</p>
+<pre><code class="language-python">&gt;&gt;&gt; vocab_transform['en'].get_stoi()
+&gt;&gt;&gt; {'pitch': 1533,
+ 'pouring': 1021,
+ 'point': 2242,
+ 'wires': 1869,
+ 'fruit': 529,
+ 'Some': 431,
+ '.': 5,
+ 'advice': 7488,
+ 'audio': 4055,
+ 'park': 120,
+ '&lt;bos&gt;': 2,
+ ...
+ }
+&gt;&gt;&gt; 
+&gt;&gt;&gt; all_unique_words_in_training_data = set([ j for i in yield_tokens(train_iter, 'en') for j in i ])
+&gt;&gt;&gt; all_unique_words_in_vocab = set(vocab_transform['en'].get_itos())
+&gt;&gt;&gt; all_unique_words_in_vocab.difference(all_unique_words_in_training_data)
+&gt;&gt;&gt; {'&lt;unk&gt;', '&lt;bos&gt;', '&lt;eos&gt;', '&lt;pad&gt;'}
+&gt;&gt;&gt; 
+&gt;&gt;&gt; print(len(vocab_transform['en'].get_stoi()))
+&gt;&gt;&gt; 10837
+&gt;&gt;&gt; d = vocab_transform['en'].get_stoi()
+&gt;&gt;&gt; print(min(d.values()), max(d.values()))
+&gt;&gt;&gt; 0 10836
+</code></pre>
+<p>In addition, the assigned value of each word in <code>vocab_transform</code> is related to the decreasing order of the occurrence frequency of the word in the dataset. We can verify this by below code. Noticing that the first 4 elements of <code>vocab_transform</code> are special symbols, so the value of the most frequently occurring word <strong>&quot;a&quot;</strong> is set to be 4, followed by words <strong>&quot;.&quot;</strong>, <strong>&quot;A&quot;,</strong> <strong>&quot;in&quot;</strong>, and <strong>&quot;the&quot;</strong> with the assigned values from 5 to 8 relatively.</p>
+<pre><code class="language-python">&gt;&gt;&gt; import pandas as pd
+&gt;&gt;&gt;
+&gt;&gt;&gt; all_words_in_training_data = [ j for i in yield_tokens(train_iter, 'en') for j in i ]
+&gt;&gt;&gt; df = pd.DataFrame(all_words_in_training_data, columns=['word'])
+&gt;&gt;&gt; word_freq = df.groupby([&quot;word&quot;])[&quot;word&quot;].count().reset_index(name=&quot;count&quot;).sort_values(by=[&quot;count&quot;], ascending=False)
+&gt;&gt;&gt; print(word_freq.head(5))
+     word  count
+1875    a  31707
+16      .  27623
+97      A  17458
+5816   in  14847
+9859  the   9923
+&gt;&gt;&gt; [ vocab_transform['en'].get_stoi()[i] for i in word_freq.head(5)['word'].tolist()]
+[4, 5, 6, 7, 8]
+</code></pre>
+
+          <div class="toc-container"><ul class="markdownIt-TOC">
+<li><a href="#data-sourcing-and-processing">Data Sourcing and Processing</a></li>
+</ul>
+</div>
+          
+          <hr />
+          <p class="next-post">下一篇：
+            <a href="https://edwardxliu.github.io/post/test/">
+              <span class="post-title">
+                Test&rarr;
+              </span>
+            </a>
+          </p>
+          
+          <div class="comment" style="text-align: center;">
+            
+
+            
+            
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+<div id="gitalk-container"></div>
+<script>
+  var gitalk = new Gitalk({
+    clientID: 'f738c647c12a9501e1b8',
+    clientSecret: '761bdc5f9bce460ba20b4faff8d769a6e3244d6d',
+    repo: 'edwardxliu.github.io',
+    owner: 'edwardxliu',
+    admin: ['edwardxliu'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+  gitalk.render('gitalk-container')
+</script>
+
+            
+            
+            
+            
+          </div>
+        </div>
+      </div>
+  </article>
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <!-- <li class="list-inline-item">
+              <a href="https://edwardxliu.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li> -->
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>Edward&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://edwardxliu.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://edwardxliu.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));</script>
+  
+  <div id="landlord-parent">
+    <div id="landlord">
+        <div class="message" style="opacity:0"></div>
+        <canvas id="live2d" width="240" height="250" class="live2d"></canvas>
+    </div>
+</div>
+
+<script type="text/javascript">
+    if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+        //移动端
+        console.log("------ 移动端");
+    } else {
+        console.log("------ PC端 " + navigator.userAgent);
+
+        addScript("https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/js/live2d.js", () => {
+            // 加载完成后再loadlive2d
+            loadlive2d("live2d", "https://edwardxliu.github.io/media/live2d/assets/hijiki.model.json");
+        });
+
+        var home_Path = "https://edwardxliu.github.io/";
+        addScript("https://edwardxliu.github.io/media/live2d/js/message.js", () => { });
+    }
+
+    // 插入js文件，完成后callback
+    function addScript(jsfile, callback) {
+        var landlord_parent = document.getElementById("landlord-parent");
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = jsfile;
+        landlord_parent.appendChild(script);
+        script.onload = script.onreadystatechange = function () {
+            if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
+                script.onload = script.onreadystatechange = null;
+                if (callback && typeof callback == "function") {
+                    callback(); //window[callback]();如果传递字符串过来 调用window['函数名']() 调用方法
+                }
+            }
+        };
+    }
+</script>
+  
+  <script src="https://edwardxliu.github.io/media/scripts/tocScript.js"></script>
+</body>
+
+</html>

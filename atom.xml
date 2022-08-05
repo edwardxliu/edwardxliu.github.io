@@ -1,0 +1,653 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://edwardxliu.github.io</id>
+    <title>Edward&apos;s Blog</title>
+    <updated>2022-08-05T06:34:34.124Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://edwardxliu.github.io"/>
+    <link rel="self" href="https://edwardxliu.github.io/atom.xml"/>
+    <subtitle>As the old saying goes, history is the great teacher, we will all someday be teachers ourselves because someday we will all be history too. We will someday be the ancients, and we can choose what that will mean.</subtitle>
+    <logo>https://edwardxliu.github.io/images/avatar.png</logo>
+    <icon>https://edwardxliu.github.io/favicon.ico</icon>
+    <rights>All rights reserved 2022, Edward&apos;s Blog</rights>
+    <entry>
+        <title type="html"><![CDATA[PLAY RTSP STREAM FROM WEB CAMERA ON HOLOLENS 2]]></title>
+        <id>https://edwardxliu.github.io/post/play-rtsp-stream-from-web-camera-on-hololens-2/</id>
+        <link href="https://edwardxliu.github.io/post/play-rtsp-stream-from-web-camera-on-hololens-2/">
+        </link>
+        <updated>2022-05-31T03:45:43.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="development-experience-sharing">Development Experience Sharing</h1>
+<p>We are trying to play some video streams from web cameras to the HoloLens 2 these days, and we think it's easy but it's actually not <strong>THAT</strong> easy. So we mark down what we've done.</p>
+<ol>
+<li>Firstly, we followed the guide <a href="https://codeholo.com/2018/01/14/playing-videos-on-the-hololens-apps/">here</a> to play some videos on Hololens 2 with the <strong>Unity</strong> component of <strong>Video Player</strong>. It is quite easy and the result is also good.</li>
+<li>We also tried to play some web videos with URLs by the <strong>Video Player</strong>, and it performed also well. Howerver, it can not play stream in **RTSP ** protocol which is used by our web cameras.</li>
+<li>So we tried another player <a href="https://github.com/RenderHeads/UnityPlugin-AVProVideo">AVPro Video</a> with some guides <a href="https://www.renderheads.com/content/docs/AVProVideo/articles/intro.html">here</a>.</li>
+<li>According to <a href="https://www.renderheads.com/content/docs/AVProVideo/articles/supportedmedia.html#f2">here</a>, it actually supports <strong>RTSP</strong> streaming protocol. Howerver, it still can't play our web cam stream with some errors showed <a href="https://www.renderheads.com/content/docs/AVProVideo/articles/faq.html">here</a>.</li>
+<li>Someone discussed the similar issue at <a href="https://github.com/RenderHeads/UnityPlugin-AVProVideo/issues/831">here</a> and it says that the <strong>AVPro Video</strong> can play RTSP stream with the url format like <strong>rtsp://77.208.177.183:55556/live.sdp</strong>, while our url is in the format of <strong>rtsp://username:password@url</strong>.</li>
+<li>Since we don't know how to remove the &quot;username:password&quot; part in the url, we decide to transfer the original <strong>RTSP</strong> stream from the web camera into a new one but without authorization.</li>
+<li>The RTSP server we build is <a href="https://github.com/aler9/rtsp-simple-server">rtsp-simple-server</a> and we use FFMPEG to pull the stream from the web camera and push it to the server.</li>
+<li>Finally, the player shows the video stream we want, but we still don't figure out how to play the stream with authorization.</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[REAL-TIME OBJECT DETECTION ON HOLOLENS 2]]></title>
+        <id>https://edwardxliu.github.io/post/video-test/</id>
+        <link href="https://edwardxliu.github.io/post/video-test/">
+        </link>
+        <updated>2022-05-18T03:49:15.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="development-experience-sharing">Development Experience Sharing</h1>
+<p>We've achieved 30fps real time object detection on HoloLens 2 with 60fps rendering rate. The final result and performance are presented in below video.</p>
+<iframe src="//player.bilibili.com/player.html?aid=639226756&bvid=BV1fY4y1z7Sy&cid=723021129&page=1" scrolling="no" align="center" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+<p>Since this is the first time we touch AR and we are not farmiliar with <strong>C#</strong> and <strong>Unity</strong>, we've tried a lot to fulfill the goal. Below list includes some tips and experiences which may be helpful.</p>
+<ol>
+<li>The <a href="https://docs.microsoft.com/en-us/windows/mixed-reality/develop/unity/tutorials/mr-azure-310">official tutorial</a> is for HoloLens 1 and we don't know how to adapt the code to be performed on HoloLens 2. Also, we don't know how to develop and deploy AI algorithms and directly execute them on HoloLens 2 since it doesn't have NVIDIA gpus (CUDA excluded) and its cpu is ARM-architectured. So we decide to make the AI algorithm running on a powerful external device and let the HoloLens to handle video capture and display the location results of objects predicted by AI algorithm. Therefore, establishing a robust and reliable communication connection between the HoloLens and the external device is necessary and important.</li>
+<li>The first way we tried is to convert each video frame captured by the HoloLens camera to a bitmap and then send the bitmap to our PC with NVIDIA gpus. A PC program receives the bitmap then predicts the names and locations of objects in that bitmap and sends those information back to HoloLens. However, the total running speed of this way is really bad. One reason we think is due to the waiting time of the information sending and receiving process on HoloLens. The other reason is that we use TCP as the transferring protocol because the correctness of each pixel in a video frame plays an important role on the prediction process of the AI model.</li>
+<li>We use YOLO as the detection algorithm cause it's fast.</li>
+<li>We tried to make the sending and receiving process asynchronous on the HoloLens, but the performance is not improved significantly.</li>
+<li>The official <a href="https://docs.microsoft.com/en-us/learn/paths/beginner-hololens-2-tutorials/">tutorial</a> about the fundamentals of HoloLens 2 development is really important. It guides us on how to establish, configure, develop, deploy and debug a <strong>Unity</strong> project to the HoloLens.</li>
+<li>Other guides such as <a href="https://arvrjourney.com/build-your-first-hololens-2-application-with-unity-and-mrtk-2-3-0-5f431d8cca8">link</a> are also helpful especially in how to set the <strong>spatial awareness mesh</strong> invisible.</li>
+<li>We tried to follow the suggestion <a href="https://docs.microsoft.com/en-us/answers/questions/579936/how-to-stream-video-to-hololens-2-with-low-latency.html">here</a> in order to increase the performance of the streaming process (e.g. using <a href="https://github.com/microsoft/MixedReality-WebRTC">MixedReality-WebRTC</a>) on HoloLens. However, the technology is a bit complicated for us. If you are interested in WebRTC, the building and deploying process can be refered <a href="https://microsoft.github.io/MixedReality-WebRTC/manual/building-core.html">here</a>, and the signal transferring is <a href="https://microsoft.github.io/MixedReality-WebRTC/manual/cs/cs-signaling.html">here</a>.</li>
+<li>We tried to use multi-threading technique to improve the performance. You can refer to <a href="https://docs.microsoft.com/en-us/dotnet/standard/threading/creating-threads-and-passing-data-at-start-time">here</a>.</li>
+<li>We tried to use <strong>async producer/consumer queue</strong> design pattern to improve the performance of the streaming process. You can refer to <a href="https://blog.stephencleary.com/2012/11/async-producerconsumer-queue-using.html">here</a>, <a href="https://makolyte.com/event-driven-dotnet-concurrent-producer-consumer-using-a-channel-as-a-non-blocking-async-queue/">here</a>, <a href="https://www.dotnetcurry.com/dotnetcore/1509/async-dotnetcore-pattern">here</a> and the official link is <a href="https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/how-to-implement-a-producer-consumer-dataflow-pattern">here</a>.</li>
+<li>We finally find out that the HoloLens actually has a live video stream. Thus, there is no need to send video stream to the PC anymore. Also, because of this, the bitmap conversion process and the corresponding TCP sending process are not required.</li>
+<li>Although <strong>UDP</strong> is not reliable and sometimes information is lost, we think it's informative enough to transfer the prediction results. This is because both YOLO and UDP are fast, one or two consecutive prediction-result loss won't effectively affect the rendering rate on HoloLens.</li>
+<li>It is quite important to know that the maximum rendering rate of Hololens 2 is 60 fps, which means a simple <strong>Unity</strong> program that has some basic <strong>Mixed Reality</strong> functions or draws some simple holograms will run at a maximum of 60 fps on Hololens 2. You may refer to the official links <a href="https://docs.microsoft.com/en-us/windows/mixed-reality/develop/advanced-concepts/understanding-performance-for-mixed-reality">here</a> and <a href="https://docs.microsoft.com/en-us/windows/mixed-reality/develop/advanced-concepts/hologram-stability">here</a>.</li>
+<li>It is also important to know that the camera frame rate of HoloLens 2 is 30 fps. Some people had discussed it <a href="https://github.com/microsoft/MixedReality-WebRTC/issues/800">here</a>. If you don't make any optimization, the program on HoloLens 2 will <strong>get capped at 30 fps</strong>, which we believe is intolerable. Therefore, since 60 fps is just a double of 30 fps, we let the HoloLens receives a UDP package in every two consecutive frames. This technique directly improves the rendering rate to 50-60 fps. Meanwhile, it does not bring negative impacts to the holograms generation and the real time object detection process.</li>
+<li>So far, we've throwed away the TCP video streaming process and the multi threading or asynchronous programing because the live streaming, YOLO and the mixed reality program are basically asynchronous and multi-processed. The only time consuming processes are the instantiate of the holograms and their maintenance.</li>
+<li>In terms of the instantiate, you may refer to <a href="https://forum.unity.com/threads/is-instantiate-bad-for-performance-unity-says-its-fast-forums-say-its-slow.182560/">here</a> and <a href="https://answers.unity.com/questions/196413/gameobject-pool-to-avoid-performance-issues-in-ins.html">here</a>.</li>
+<li>We tried to use <a href="https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2?view=net-6.0#code-try-4">Dictionary</a> class to manage the game objects created by Unity with the purpose of reducing the searching and matching time but it's not necessary.</li>
+<li>Hologram objects can also be stored in a array or a list. You may refer to <a href="https://stackoverflow.com/questions/454916/performance-of-arrays-vs-lists">here</a> and <a href="https://stackoverflow.com/questions/434761/array-versus-listt-when-to-use-which">here</a> to decide which one is better.</li>
+<li>Since the maintenance of those objects requires a lot of searching process, you may refer to <a href="https://stackoverflow.com/questions/46234289/how-to-increase-performance-of-foreach-loop">here</a>, <a href="https://stackoverflow.com/questions/36332255/how-to-increase-performance-of-many-foreach-loop">here</a> and <a href="https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/how-to-write-a-simple-parallel-for-loop">here</a> to optimize your <strong>for loops.</strong> we failed at using <strong>&quot;Parallel.For&quot;</strong> because we think the iteration and the creation or removing process from a same array or list are not allowed.</li>
+<li>Finally, when delopying the Unity project to Hololens, choose <strong>Release</strong> instead of <strong>Debug</strong> mode in <strong>Visual Studio</strong> will significantly improve the performance of the program on HoloLens.</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[SIGMOID FUNCTION OPTIMIZATION]]></title>
+        <id>https://edwardxliu.github.io/post/sigmoid-function-optimization/</id>
+        <link href="https://edwardxliu.github.io/post/sigmoid-function-optimization/">
+        </link>
+        <updated>2022-04-07T07:14:38.000Z</updated>
+        <content type="html"><![CDATA[<p>The definition of the sigmoid function is</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>s</mi><mi>i</mi><mi>g</mi><mi>m</mi><mi>o</mi><mi>i</mi><mi>d</mi><mrow><mo fence="true">(</mo><mi>x</mi><mo fence="true">)</mo></mrow><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>x</mi></mrow></msup></mrow></mfrac></mrow><annotation encoding="application/x-tex">sigmoid\left ( x \right )=\frac{1}{1+e^{-x}} 
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">s</span><span class="mord mathdefault">i</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">m</span><span class="mord mathdefault">o</span><span class="mord mathdefault">i</span><span class="mord mathdefault">d</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">(</span><span class="mord mathdefault">x</span><span class="mclose delimcenter" style="top:0em;">)</span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.09077em;vertical-align:-0.7693300000000001em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.32144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord"><span class="mord mathdefault">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.697331em;"><span style="top:-2.989em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mathdefault mtight">x</span></span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7693300000000001em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
+<p>In Python code, it would be sth. like below shows.</p>
+<pre><code class="language-python">import math
+def sigmoid(x):
+	return 1 / (1 + math.exp(-x))
+</code></pre>
+<p>Because it involves a division and a exponent operation, it will cost a certain amount of computing time during the training and prediction process of a neural network. However, since we often use the output of the sigmoid function in a comparison of a given threshold <strong>T</strong> like</p>
+<pre><code class="language-python">if sigmoid(x) &gt; T:
+	... do something
+</code></pre>
+<p>we can rewrite the sigmoid formula like below.</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mtable><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mi>f</mi><mrow><mo fence="true">(</mo><mi>x</mi><mo fence="true">)</mo></mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>=</mo><mi>y</mi><mo>=</mo><mfrac><mn>1</mn><mrow><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>x</mi></mrow></msup></mrow></mfrac></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>⇒</mo><mfrac><mn>1</mn><mi>y</mi></mfrac><mo>=</mo><mn>1</mn><mo>+</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>x</mi></mrow></msup></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>⇒</mo><mfrac><mn>1</mn><mi>y</mi></mfrac><mo>−</mo><mn>1</mn><mo>=</mo><msup><mi>e</mi><mrow><mo>−</mo><mi>x</mi></mrow></msup></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>⇒</mo><mi>l</mi><mi>n</mi><mrow><mo fence="true">(</mo><mfrac><mn>1</mn><mi>y</mi></mfrac><mo>−</mo><mn>1</mn><mo fence="true">)</mo></mrow><mo>=</mo><mo>−</mo><mi>x</mi></mrow></mstyle></mtd></mtr><mtr><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow></mrow></mstyle></mtd><mtd><mstyle scriptlevel="0" displaystyle="true"><mrow><mrow></mrow><mo>⇒</mo><mo>−</mo><mi>l</mi><mi>n</mi><mrow><mo fence="true">(</mo><mfrac><mn>1</mn><mi>y</mi></mfrac><mo>−</mo><mn>1</mn><mo fence="true">)</mo></mrow><mo>=</mo><mi>x</mi></mrow></mstyle></mtd></mtr></mtable><annotation encoding="application/x-tex">\begin{aligned} % requires amsmath; align* for no eq. number
+
+f\left ( x \right )&amp;=y=\frac{1}{1+e^{-x}} \\
+&amp;\Rightarrow\frac{1}{y}=1+e^{-x} \\
+&amp;\Rightarrow\frac{1}{y}-1=e^{-x} \\
+&amp;\Rightarrow ln\left ( \frac{1}{y} -1 \right )=-x \\
+&amp;\Rightarrow-ln\left ( \frac{1}{y} -1 \right )=x
+\end{aligned}
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:12.79459em;vertical-align:-6.147295em;"></span><span class="mord"><span class="mtable"><span class="col-align-r"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:6.647295em;"><span style="top:-8.775855em;"><span class="pstrut" style="height:3.45em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">(</span><span class="mord mathdefault">x</span><span class="mclose delimcenter" style="top:0em;">)</span></span></span></span><span style="top:-6.385085em;"><span class="pstrut" style="height:3.45em;"></span><span class="mord"></span></span><span style="top:-3.8832050000000002em;"><span class="pstrut" style="height:3.45em;"></span><span class="mord"></span></span><span style="top:-1.2527650000000006em;"><span class="pstrut" style="height:3.45em;"></span><span class="mord"></span></span><span style="top:1.4472649999999994em;"><span class="pstrut" style="height:3.45em;"></span><span class="mord"></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:6.147295em;"><span></span></span></span></span></span><span class="col-align-l"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:6.647295em;"><span style="top:-8.775855em;"><span class="pstrut" style="height:3.45em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">y</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.32144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord"><span class="mord mathdefault">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.697331em;"><span style="top:-2.989em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mathdefault mtight">x</span></span></span></span></span></span></span></span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.7693300000000001em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span><span style="top:-6.385085em;"><span class="pstrut" style="height:3.45em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">⇒</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.32144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">y</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8804400000000001em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord"><span class="mord mathdefault">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.821331em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mathdefault mtight">x</span></span></span></span></span></span></span></span></span></span></span><span style="top:-3.8832050000000002em;"><span class="pstrut" style="height:3.45em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">⇒</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.32144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">y</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8804400000000001em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord"><span class="mord mathdefault">e</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.821331em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mathdefault mtight">x</span></span></span></span></span></span></span></span></span></span></span><span style="top:-1.2527650000000006em;"><span class="pstrut" style="height:3.45em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">⇒</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.32144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">y</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8804400000000001em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord">−</span><span class="mord mathdefault">x</span></span></span><span style="top:1.4472649999999994em;"><span class="pstrut" style="height:3.45em;"></span><span class="mord"><span class="mord"></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">⇒</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord">−</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.32144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">y</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8804400000000001em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mord mathdefault">x</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:6.147295em;"><span></span></span></span></span></span></span></span></span></span></span></span></p>
+<p>Now we get the inverse function of <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>f</mi><mo>(</mo><mi>x</mi><mo>)</mo></mrow><annotation encoding="application/x-tex">f(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span></span></span></span>.</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msup><mi>f</mi><mrow><mo>−</mo><mn>1</mn></mrow></msup><mrow><mo fence="true">(</mo><mi>x</mi><mo fence="true">)</mo></mrow><mo>=</mo><mo>−</mo><mi>l</mi><mi>n</mi><mrow><mo fence="true">(</mo><mfrac><mn>1</mn><mi>y</mi></mfrac><mo>−</mo><mn>1</mn><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">f^{-1}\left ( x \right )=-ln\left ( \frac{1}{y} -1 \right ) 
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.1141079999999999em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.864108em;"><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">−</span><span class="mord mtight">1</span></span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">(</span><span class="mord mathdefault">x</span><span class="mclose delimcenter" style="top:0em;">)</span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.40003em;vertical-align:-0.95003em;"></span><span class="mord">−</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size3">(</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.32144em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.03588em;">y</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.8804400000000001em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size3">)</span></span></span></span></span></span></span></p>
+<p>Therefore,  in terms of the <code>if</code> statement above, we can take the inverse on the two sides of <code>&gt;</code>. The left side would be <code>x</code>, and the right side would be a <em><strong>desigmoid</strong></em> threshold <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mo>−</mo><mi>l</mi><mi>n</mi><mrow><mo fence="true">(</mo><mfrac><mn>1</mn><mi>T</mi></mfrac><mo>−</mo><mn>1</mn><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">-ln\left ( \frac{1}{T} -1 \right )</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.20001em;vertical-align:-0.35001em;"></span><span class="mord">−</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;"><span class="delimsizing size1">(</span></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.845108em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.394em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">1</span><span class="mclose delimcenter" style="top:0em;"><span class="delimsizing size1">)</span></span></span></span></span></span> which is a constant as well. So, in the end, the above <code>if</code> statement can be rewrited to</p>
+<pre><code class="language-python">if x &gt; desigmoid_T:
+	... do something
+</code></pre>
+<p>This will significantly increase the performance of the <code>if</code> statement.</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[CODE REVIEW OF LANGUAGE TRANSLATION WITH NN.TRANSFORMER AND TORCHTEXT - PART 2]]></title>
+        <id>https://edwardxliu.github.io/post/code-review-of-language-translation-with-nntransformer-and-torchtext-part-2/</id>
+        <link href="https://edwardxliu.github.io/post/code-review-of-language-translation-with-nntransformer-and-torchtext-part-2/">
+        </link>
+        <updated>2022-04-02T09:51:47.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="token-embedding">Token Embedding</h1>
+<p>The second part of the <a href="https://pytorch.org/tutorials/beginner/translation_transformer.html">source code</a> is related to token and its position embedding. We reivew the former firstly.</p>
+<pre><code class="language-python">from torch import Tensor
+import torch
+import torch.nn as nn
+from torch.nn import Transformer
+import math
+DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+# helper Module to convert tensor of input indices into corresponding tensor of token embeddings
+class TokenEmbedding(nn.Module):
+    def __init__(self, vocab_size: int, emb_size):
+        super(TokenEmbedding, self).__init__()
+        self.embedding = nn.Embedding(vocab_size, emb_size)
+        self.emb_size = emb_size
+
+    def forward(self, tokens: Tensor):
+        return self.embedding(tokens.long()) * math.sqrt(self.emb_size)
+</code></pre>
+<p>The <code>TokenEmbedding</code> class just includes an initialize function and a forward function where the <code>__init__</code> function (aka. the constructor) is called when the class is instantiated as an object, and the <code>forward</code> function is called when parsing parameters directly to the object, which invokes the <code>__call__</code> method because the class simply inherits the <code>__call__</code> method of the <code>nn.Module</code> class. It is here where the <code>forward</code> method is called. Below test code presents an example.</p>
+<pre><code class="language-python">&gt;&gt;&gt; class Test(nn.Module):
+...     def __init__(self):
+...         super(Test, self).__init__()
+...         print('Test class __init__')
+...     def forward(self, x):
+...         return x + 1
+...
+&gt;&gt;&gt; t = Test()
+Test class __init__
+&gt;&gt;&gt; t(1)
+2
+&gt;&gt;&gt;
+</code></pre>
+<p>Back to the source code, the initialization of the <code>TokenEmbedding</code> class is related to the instantiation of <code>nn.Embedding</code> class and two parameters, <code>vocab_size</code> and <code>emb_size</code> which refer to the length of the token dictionary <code>vocab_transform</code> mentioned in <a href="https://edwardxliu.github.io/post/code-review-of-language-translation-with-nntransformer-and-torchtext-part-1/">here</a> and the length of each word vector. So, each token in the dictionary will be associated with a <strong>number vector (tensor)</strong> of length equal to <code>emb_size</code>.</p>
+<p>The <code>nn.embedding(num_embeddings, embedding_dim)</code> will initialize a tensor (learnable weights) with shape (num_embeddings, embedding_dim) from <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="double-struck">N</mi><mrow><mo fence="true">(</mo><mn>0</mn><mo separator="true">,</mo><mn>1</mn><mo fence="true">)</mo></mrow></mrow><annotation encoding="application/x-tex">\mathbb{N}\left ( 0, 1 \right )</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathbb">N</span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="minner"><span class="mopen delimcenter" style="top:0em;">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">1</span><span class="mclose delimcenter" style="top:0em;">)</span></span></span></span></span>. We can review the values in the tensor by calling the <code>.weight</code> function and check if it is normally distributed by <strong>p value</strong> from <code>scipy.stats.normaltest</code> function as below code shows. It is more likely to be a normal distribution when p value is closer to 1.</p>
+<pre><code class="language-python">&gt;&gt;&gt; from torch import nn
+&gt;&gt;&gt; from scipy import stats
+&gt;&gt;&gt;
+&gt;&gt;&gt; embedding = nn.Embedding(10,512)
+&gt;&gt;&gt; print(embedding.weight.shape)
+torch.Size([10, 512])
+&gt;&gt;&gt; print(embedding.weight)
+Parameter containing:
+tensor([[ 0.1744,  1.3013, -0.9791,  ..., -0.0872,  0.4686, -0.9148],
+        [-0.5932,  0.0042, -0.0580,  ..., -1.7171,  2.0935, -1.3774],
+        [-0.6436, -0.4488,  2.2102,  ..., -0.2626, -0.0759,  0.7769],
+        ...,
+        [-0.0236, -1.0380,  1.0186,  ..., -1.6911,  0.4438, -0.1033],
+        [ 0.3624, -0.3315, -0.2723,  ...,  0.8990, -0.5651, -0.2654],
+        [ 0.3786,  0.9338,  0.7280,  ..., -1.8523, -1.1715, -0.9778]],
+       requires_grad=True)
+&gt;&gt;&gt; w = embedding.weight.reshape(1,-1).tolist()[0]
+&gt;&gt;&gt; stats.normaltest(w)
+NormaltestResult(statistic=0.2605386827757071, pvalue=0.8778589553262913)
+</code></pre>
+<p>We can also plot those values by below code to help check it.</p>
+<pre><code class="language-python">&gt;&gt;&gt; s = pd.DataFrame(w,columns = ['value'])
+&gt;&gt;&gt;
+&gt;&gt;&gt; fig = plt.figure(figsize = (10,6))
+&gt;&gt;&gt; ax1 = fig.add_subplot(2,1,1)
+&gt;&gt;&gt; ax1.scatter(s.index, s.values)
+&lt;matplotlib.collections.PathCollection object at 0x000001B56A6985E0&gt;
+&gt;&gt;&gt; plt.grid()
+&gt;&gt;&gt;
+&gt;&gt;&gt; ax2 = fig.add_subplot(2,1,2)
+&gt;&gt;&gt; s.hist(bins=30,alpha = 0.5,ax = ax2)
+array([&lt;AxesSubplot:title={'center':'value'}&gt;], dtype=object)
+&gt;&gt;&gt; s.plot(kind = 'kde', secondary_y=True,ax = ax2)
+&lt;AxesSubplot:&gt;
+&gt;&gt;&gt; plt.grid()
+&gt;&gt;&gt; plt.show()
+</code></pre>
+<p><img src="https://raw.githubusercontent.com/edwardxliu/Picbed_PicGo/main/Figure_1.png#pic_center" alt="plot result img" loading="lazy"><br>
+After the <code>embedding</code> object is created, we can parsing some tensors with integers directly to the object and it will return the tensors with length <code>embedding_dim</code> from the <code>embedding.weight</code> according to those integers as indices of the tensors. As below instance shows, the embedding is a 5x3 tensor whose values are normally distributed, and the input is a 2x4 tensor whose values are from [0, 5). The first dimension of the output tensor after embedding is a 2 which is equal to the first dimension of the input. The second dimension of the output is 4 since each tensor in the input contains 4 integers and each integer is treated as an index in <code>embedding.weight</code>. So the first tensor <strong>[0, 2, 0, 1]</strong> in the input means just copying of the <strong>0th, 2th, 0th, and 1th</strong> tensor from the embedding tensor to the output and there is why the third dimension of the output is 3 because it just copies tensors from <code>embedding</code> without changing their shapes.</p>
+<pre><code class="language-python">&gt;&gt;&gt; import torch
+&gt;&gt;&gt; from torch import nn
+&gt;&gt;&gt; from scipy import stats
+&gt;&gt;&gt;
+&gt;&gt;&gt; embedding = nn.Embedding(5,3)
+&gt;&gt;&gt; print(embedding.weight)
+Parameter containing:
+tensor([[-1.5359,  1.3167, -0.4135],
+        [-0.1170,  0.9554, -0.7263],
+        [-0.3082, -1.0919, -1.2622],
+        [ 0.3853, -1.9481, -0.1821],
+        [ 1.0909, -1.1010,  0.6301]], requires_grad=True)
+&gt;&gt;&gt; input = torch.LongTensor([[0, 2, 0, 1], [1, 3, 4, 4]])
+&gt;&gt;&gt; print(input.size())
+torch.Size([2, 4])
+&gt;&gt;&gt; output = embedding(input)
+&gt;&gt;&gt; print(output.size())
+torch.Size([2, 4, 3])
+&gt;&gt;&gt; print(output)
+tensor([[[-1.5359,  1.3167, -0.4135],
+         [-0.3082, -1.0919, -1.2622],
+         [-1.5359,  1.3167, -0.4135],
+         [-0.1170,  0.9554, -0.7263]],
+
+        [[-0.1170,  0.9554, -0.7263],
+         [ 0.3853, -1.9481, -0.1821],
+         [ 1.0909, -1.1010,  0.6301],
+         [ 1.0909, -1.1010,  0.6301]]], grad_fn=&lt;EmbeddingBackward0&gt;)
+&gt;&gt;&gt;         
+</code></pre>
+<p>Therefore, after knowing how <code>nn.embedding</code> works, we can use it to embed words. As below sample code shows, because the word dictionary only has 2 words, we only need 2 embedding tensors and the embedding dimension is set to 5 because we want each word will be tranferred to a 5 dimensional tensor. We can set the embedding dimension to any other positive integers greater than 0. So according to the example, the word <strong>hello</strong> is embedded as [ 1.5414, -0.8476,  1.2966, -1.1901, -0.0852] which is the 0th tensor of <code>embeds.weight</code>, because the value of the word is 0 in the <code>word_to_ix</code> dictionary.</p>
+<pre><code class="language-python">&gt;&gt;&gt; import torch
+&gt;&gt;&gt; import torch.nn as nn
+&gt;&gt;&gt; from torch.autograd import Variable
+&gt;&gt;&gt;
+&gt;&gt;&gt; word_to_ix = {'hello': 0, 'world': 1}
+&gt;&gt;&gt; embeds = nn.Embedding(2, 5)
+&gt;&gt;&gt; print(embeds.weight)
+Parameter containing:
+tensor([[ 1.5414, -0.8476,  1.2966, -1.1901, -0.0852],
+        [-1.9759, -0.4362, -0.9985,  1.3360,  0.1116]], requires_grad=True)
+&gt;&gt;&gt;
+&gt;&gt;&gt; hello_idx = torch.LongTensor([word_to_ix['hello']])
+&gt;&gt;&gt; hello_idx = Variable(hello_idx)
+&gt;&gt;&gt; hello_embed = embeds(hello_idx)
+&gt;&gt;&gt; print(hello_embed)
+tensor([[ 1.5414, -0.8476,  1.2966, -1.1901, -0.0852]],
+       grad_fn=&lt;EmbeddingBackward0&gt;)
+&gt;&gt;&gt;
+</code></pre>
+<p>Backing to the source code, now we know that the <code>self.embedding()</code> in the <code>forward</code> function will embed tensors with indices to other tensors. The <code>tokens.long()</code> converts the values in the tensor to integers similar to <code>math.floor()</code>. The reason of multiplying the embedded tensor by <code>math.sqrt(self.emb_size)</code> is in section 3.4 of the original <a href="https://arxiv.org/pdf/1706.03762.pdf">paper</a>. The details are related to another paper, so far, I don't get it.</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[OLD TIME]]></title>
+        <id>https://edwardxliu.github.io/post/old-time/</id>
+        <link href="https://edwardxliu.github.io/post/old-time/">
+        </link>
+        <updated>2022-03-25T15:14:41.000Z</updated>
+        <content type="html"><![CDATA[<p>That year, breeze kissed trees<br>
+Fallen leaves swayed as they were sleeping<br>
+That year, your smile was sweet<br>
+flickering across your lips <br /><br>
+Dream shines in eyes<br>
+Memory is following<br>
+the familiar melody<br>
+fading away gradually <br /><br>
+Back to the past<br>
+Miss you all night<br>
+Dream of the past<br>
+Does it come true at present <br /><br>
+Oh the old times have<br>
+disappeared in a blink of eyes<br>
+I haven't told you that<br>
+there's love everlast <br /><br>
+Today I live very well<br>
+Walking through the familiar streets where<br>
+strangers nod and smile<br>
+but where have you been all the while <br /><br>
+Softly hum the songs<br>
+Tear is fermented by the past<br>
+Stories have gone<br>
+with the dispersed crowd<br>
+but I've been keeping them in heart <br /><br>
+Back to the past<br>
+Miss you all night<br>
+Dream of the past<br>
+Does it come true at present <br /><br>
+Oh the old times have<br>
+disappeared in a blink of eyes<br>
+I haven't told you that<br>
+there's love everlast</p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[CODE REVIEW OF LANGUAGE TRANSLATION WITH NN.TRANSFORMER AND TORCHTEXT - PART 1]]></title>
+        <id>https://edwardxliu.github.io/post/code-review-of-language-translation-with-nntransformer-and-torchtext-part-1/</id>
+        <link href="https://edwardxliu.github.io/post/code-review-of-language-translation-with-nntransformer-and-torchtext-part-1/">
+        </link>
+        <updated>2022-03-25T07:43:40.000Z</updated>
+        <content type="html"><![CDATA[<h1 id="data-sourcing-and-processing">Data Sourcing and Processing</h1>
+<p>The first part of the <a href="https://pytorch.org/tutorials/beginner/translation_transformer.html">source code</a> related to data processing is showed below.</p>
+<pre><code class="language-python">from torchtext.data.utils import get_tokenizer
+from torchtext.vocab import build_vocab_from_iterator
+from torchtext.datasets import Multi30k
+from typing import Iterable, List
+
+SRC_LANGUAGE = 'de'
+TGT_LANGUAGE = 'en'
+
+# Place-holders
+token_transform = {}
+vocab_transform = {}
+
+# Create source and target language tokenizer. Make sure to install the dependencies.
+# pip install -U spacy
+# python -m spacy download en_core_web_sm
+# python -m spacy download de_core_news_sm
+token_transform[SRC_LANGUAGE] = get_tokenizer('spacy', language='de_core_news_sm')
+token_transform[TGT_LANGUAGE] = get_tokenizer('spacy', language='en_core_web_sm')
+</code></pre>
+<p><code>token_transform</code> and <code>vocab_transform</code> are two dictionaries for storing the token transfomers of the source (German) and target (English) languages. The token transfomer <code>get_tokenizer</code> is a word-segmentation function for transferring a string sentence into a list of words and punctuation characters. The below piece of code shows an example of splitting a English sentence into a list of English words by spaces with the <code>basic_english</code> tokenizer.</p>
+<pre><code class="language-python">&gt;&gt;&gt; import torchtext
+&gt;&gt;&gt; from torchtext.data import get_tokenizer
+&gt;&gt;&gt; tokenizer = get_tokenizer(&quot;basic_english&quot;)
+&gt;&gt;&gt; tokens = tokenizer(&quot;You can now install TorchText using pip!&quot;)
+&gt;&gt;&gt; tokens
+&gt;&gt;&gt; ['you', 'can', 'now', 'install', 'torchtext', 'using', 'pip', '!']
+</code></pre>
+<p>Like the code presented before, the <code>get_tokenizer</code> function can also call other tokenizer libraries (e.g. spacy, moses, toktok, revtok, subword) if they are preinstalled. It should be noticed that the tokenizer from <code>spacy</code> performs better than the original <code>basic_english</code>. For example, we can do a comparison test like below showed.</p>
+<pre><code class="language-python">&gt;&gt;&gt; get_tokenizer(&quot;basic_english&quot;)(&quot;Let's go to N.Y.!&quot;)
+&gt;&gt;&gt; ['let', &quot;'&quot;, 's', 'go', 'to', 'n', '.', 'y', '.', '!']
+&gt;&gt;&gt; get_tokenizer(&quot;spacy&quot;, language=&quot;en_core_web_sm&quot;)(&quot;Let's go to N.Y.!&quot;)
+&gt;&gt;&gt; ['Let', &quot;'s&quot;, 'go', 'to', 'N.Y.', '!']
+</code></pre>
+<p>Moreover, I've also tested the performance of the spacy tokenizer on <strong>Chinese</strong>,  but the result showed below is worse than expected because <code>清华大学</code> should not be segmented.</p>
+<pre><code class="language-python">&gt;&gt;&gt; get_tokenizer(&quot;spacy&quot;, language=&quot;zh_core_web_sm&quot;)(&quot;我在清华大学读书。&quot;)
+&gt;&gt;&gt; ['我', '在', '清华', '大学', '读书', '。']
+</code></pre>
+<br />
+<details>
+<summary><font color=darkred>The details about the spacy tokenization</font></summary>
+<p>Tokenization is the task of splitting a text into meaningful segments, called tokens. The input to the tokenizer is a unicode text, and the output is a  <code>Doc</code> object. To construct a <code>Doc</code> object, you need a <code>Vocab</code> instance, a sequence of word strings, and optionally a sequence of <code>spaces</code> booleans, which allow you to maintain alignment of the tokens into the original string.<br /><br>
+During processing, spaCy first <strong>tokenizes</strong> the text, i.e. segments it into words, punctuation and so on. This is done by applying rules specific to each language. For example, punctuation at the end of a sentence should be split off – whereas “U.K.” should remain one token. Each <code>Doc</code> consists of individual tokens, and we can iterate over them:</p>
+<pre><code class="language-python">&gt;&gt;&gt; import spacy
+&gt;&gt;&gt; nlp = spacy.load(&quot;en_core_web_sm&quot;)
+&gt;&gt;&gt; doc = nlp(&quot;Apple is looking at buying U.K. startup for $1 billion&quot;)
+&gt;&gt;&gt; for token in doc:
+&gt;&gt;&gt;     print(token.text)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">0</th>
+<th style="text-align:center">1</th>
+<th style="text-align:center">2</th>
+<th style="text-align:center">3</th>
+<th style="text-align:center">4</th>
+<th style="text-align:center">5</th>
+<th style="text-align:center">6</th>
+<th style="text-align:center">7</th>
+<th style="text-align:center">8</th>
+<th style="text-align:center">9</th>
+<th style="text-align:center">10</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">Apple</td>
+<td style="text-align:center">is</td>
+<td style="text-align:center">looking</td>
+<td style="text-align:center">at</td>
+<td style="text-align:center">buying</td>
+<td style="text-align:center">U.K.</td>
+<td style="text-align:center">startup</td>
+<td style="text-align:center">for</td>
+<td style="text-align:center">$</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">billion</td>
+</tr>
+<tr>
+<td style="text-align:center"><br /></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">First, the raw text is split on whitespace characters, similar to <code>text.split(' ')</code>. Then, the tokenizer processes the text from left to right. On each substring, it performs two checks:</td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+</tr>
+</tbody>
+</table>
+<ol>
+<li>
+<p><strong>Does the substring match a tokenizer exception rule?</strong> For example, “don’t” does not contain whitespace, but should be split into two tokens, “do” and “n’t”, while “U.K.” should always remain one token.</p>
+</li>
+<li>
+<p><strong>Can a prefix, suffix or infix be split off?</strong> For example punctuation like commas, periods, hyphens or quotes.</p>
+</li>
+</ol>
+<p>If there’s a match, the rule is applied and the tokenizer continues its loop, starting with the newly split substrings. This way, spaCy can split <strong>complex, nested tokens</strong> like combinations of abbreviations and multiple punctuation marks.<br>
+<img src="https://spacy.io/tokenization-9b27c0f6fe98dcb26239eba4d3ba1f3d.svg#pic_center" alt="enter image description here" loading="lazy"><br>
+While punctuation rules are usually pretty general, tokenizer exceptions strongly depend on the specifics of the individual language. This is why each available language has its own subclass, like <code>English</code> or <code>German</code>, that loads in lists of hard-coded data and exception rules.<br /></p>
+<details>
+<summary><font color=darkred>Algorithm details: How spaCy's tokenizer works</font></summary>
+<p>spaCy introduces a novel tokenization algorithm that gives a better balance between performance, ease of definition and ease of alignment into the original string.<br /><br>
+After consuming a prefix or suffix, we consult the special cases again. We want the special cases to handle things like “don’t” in English, and we want the same rule to work for “(don’t)!“. We do this by splitting off the open bracket, then the exclamation, then the closed bracket, and finally matching the special case. Here’s an implementation of the algorithm in Python optimized for readability rather than performance:</p>
+<pre><code class="language-python">def tokenizer_pseudo_code(
+    text,
+    special_cases,
+    prefix_search,
+    suffix_search,
+    infix_finditer,
+    token_match,
+    url_match
+):
+    tokens = []
+    for substring in text.split():
+        suffixes = []
+        while substring:
+            while prefix_search(substring) or suffix_search(substring):
+                if token_match(substring):
+                    tokens.append(substring)
+                    substring = &quot;&quot;
+                    break
+                if substring in special_cases:
+                    tokens.extend(special_cases[substring])
+                    substring = &quot;&quot;
+                    break
+                if prefix_search(substring):
+                    split = prefix_search(substring).end()
+                    tokens.append(substring[:split])
+                    substring = substring[split:]
+                    if substring in special_cases:
+                        continue
+                if suffix_search(substring):
+                    split = suffix_search(substring).start()
+                    suffixes.append(substring[split:])
+                    substring = substring[:split]
+            if token_match(substring):
+                tokens.append(substring)
+                substring = &quot;&quot;
+            elif url_match(substring):
+                tokens.append(substring)
+                substring = &quot;&quot;
+            elif substring in special_cases:
+                tokens.extend(special_cases[substring])
+                substring = &quot;&quot;
+            elif list(infix_finditer(substring)):
+                infixes = infix_finditer(substring)
+                offset = 0
+                for match in infixes:
+                    if offset == 0 and match.start() == 0:
+                        continue
+                    tokens.append(substring[offset : match.start()])
+                    tokens.append(substring[match.start() : match.end()])
+                    offset = match.end()
+                if substring[offset:]:
+                    tokens.append(substring[offset:])
+                substring = &quot;&quot;
+            elif substring:
+                tokens.append(substring)
+                substring = &quot;&quot;
+        tokens.extend(reversed(suffixes))
+    for match in matcher(special_cases, text):
+        tokens.replace(match, special_cases[match])
+    return tokens
+</code></pre>
+<p>The algorithm can be summarized as follows:</p>
+<ol>
+<li>Iterate over space-separated substrings.</li>
+<li>Look for a token match. If there is a match, stop processing and keep this token.</li>
+<li>Check whether we have an explicitly defined special case for this substring. If we do, use it.</li>
+<li>Otherwise, try to consume one prefix. If we consumed a prefix, go back to #2, so that the token match and special cases always get priority.</li>
+<li>If we didn’t consume a prefix, try to consume a suffix and then go back to #2.</li>
+<li>If we can’t consume a prefix or a suffix, look for a URL match.</li>
+<li>If there’s no URL match, then look for a special case.</li>
+<li>Look for “infixes” – stuff like hyphens etc. and split the substring into tokens on all infixes.</li>
+<li>Once we can’t consume any more of the string, handle it as a single token.</li>
+<li>Make a final pass over the text to check for special cases that include spaces or that were missed due to the incremental processing of affixes.</li>
+</ol>
+<p><strong>Global</strong> and <strong>language-specific</strong> tokenizer data is supplied via the language data in <code>spacy/lang</code>. The tokenizer exceptions define special cases like “don’t” in English, which needs to be split into two tokens: <code>{ORTH: &quot;do&quot;}</code> and <code>{ORTH: &quot;n't&quot;, NORM: &quot;not&quot;}</code>. The prefixes, suffixes and infixes mostly define punctuation rules – for example, when to split off periods (at the end of a sentence), and when to leave tokens containing periods intact (abbreviations like “U.S.”).</p>
+</details>
+</details> <br />
+<p>The next part of the data processing code is basically a function for returning the list of tokens of a given sentence.</p>
+<pre><code class="language-python"># helper function to yield list of tokens
+def yield_tokens(data_iter: Iterable, language: str) -&gt; List[str]:
+    language_index = {SRC_LANGUAGE: 0, TGT_LANGUAGE: 1}
+
+    for data_sample in data_iter:
+        yield token_transform[language](data_sample[language_index[language]])
+</code></pre>
+<p>Since the input dataset <code>Multi30k</code> is composed with a series of tuples where each tuple contains two strings (one is in <strong>German</strong> and the other one is the corresponding translation in <strong>English</strong>, and the order of them can be switched via the parameter <code>language_pair</code>), the <code>language_index</code> is used to determine the indices of the elements in a tuple.  So if the input parameter <code>language = 'de'</code>, the <code>language_index[language]</code> will return <strong>0</strong>, and it will  return <strong>1</strong> if <code>language = 'en'</code> because of <code>language_index = {SRC_LANGUAGE: 0, TGT_LANGUAGE: 1}</code>. Therefore, <code>data_sample[language_index[language]]</code> in the for loop will traverse each tuple in the given dataset and be like <code>data_sample[0]</code> or <code>data_sample[1]</code> depending on the value of <code>language</code>, then returns the corresponding string sentences. After that, <code>token_transform[language]</code> will call corresponding tokenizer and transfer the sentence to a list of tokens.  The following code may help you understand the <code>yield_tokens</code> function.</p>
+<pre><code class="language-python">&gt;&gt;&gt; [i for i in Multi30k(split='valid', language_pair=('de', 'en'))][0]
+&gt;&gt;&gt; ('Eine Gruppe von Männern lädt Baumwolle auf einen Lastwagen', 'A group of men are loading cotton onto a truck')
+&gt;&gt;&gt; [i for i in Multi30k(split='valid', language_pair=('en', 'de'))][0]
+&gt;&gt;&gt; ('A group of men are loading cotton onto a truck', 'Eine Gruppe von Männern lädt Baumwolle auf einen Lastwagen')
+&gt;&gt;&gt;
+&gt;&gt;&gt; for data_sample in  Multi30k(split='valid', language_pair=('de', 'en')):
+...   print(data_sample[0], token_transform['de'](data_sample[0]))
+...   print(data_sample[1], token_transform['en'](data_sample[1]))
+...   break
+...
+&gt;&gt;&gt; Eine Gruppe von Männern lädt Baumwolle auf einen Lastwagen ['Eine', 'Gruppe', 'von', 'Männern', 'lädt', 'Baumwolle', 'auf', 'einen', 'Lastwagen']
+&gt;&gt;&gt; A group of men are loading cotton onto a truck ['A', 'group', 'of', 'men', 'are', 'loading', 'cotton', 'onto', 'a', 'truck']
+</code></pre>
+<p>The next part of the code is used to build two word dictionaries (<strong>German</strong> and <strong>English</strong>) in which each word is assigned with a <strong>unique integer</strong> (starting from 0 to the number of unique words in the given dataset). The words and their values will be used to build word vectors later.</p>
+<pre><code class="language-python"># Define special symbols and indices
+UNK_IDX, PAD_IDX, BOS_IDX, EOS_IDX = 0, 1, 2, 3
+# Make sure the tokens are in order of their indices to properly insert them in vocab
+special_symbols = ['&lt;unk&gt;', '&lt;pad&gt;', '&lt;bos&gt;', '&lt;eos&gt;']
+
+for ln in [SRC_LANGUAGE, TGT_LANGUAGE]:
+    # Training data Iterator
+    train_iter = Multi30k(split='train', language_pair=(SRC_LANGUAGE, TGT_LANGUAGE))
+    # Create torchtext's Vocab object
+    vocab_transform[ln] = build_vocab_from_iterator(yield_tokens(train_iter, ln),
+                                                    min_freq=1,
+                                                    specials=special_symbols,
+                                                    special_first=True)
+# Set UNK_IDX as the default index. This index is returned when the token is not found.
+# If not set, it throws RuntimeError when the queried token is not found in the Vocabulary.
+for ln in [SRC_LANGUAGE, TGT_LANGUAGE]:
+    vocab_transform[ln].set_default_index(UNK_IDX)                                                   
+</code></pre>
+<p>The <code>build_vocab_from_iterator</code> function will return a <code>Vocab</code> which is an object from <code>torchtext</code>.  We can use <code>get_stoi()</code> function to list all the keys and values in that object. Noticing that <code>specials</code> and <code>special_first</code> are set, which means the values of four <code>special_symbols</code> are set from 0 to 3 in the dictionary. We can also play around with the <code>Vocab</code> and do some checks related to the keys and values.</p>
+<pre><code class="language-python">&gt;&gt;&gt; vocab_transform['en'].get_stoi()
+&gt;&gt;&gt; {'pitch': 1533,
+ 'pouring': 1021,
+ 'point': 2242,
+ 'wires': 1869,
+ 'fruit': 529,
+ 'Some': 431,
+ '.': 5,
+ 'advice': 7488,
+ 'audio': 4055,
+ 'park': 120,
+ '&lt;bos&gt;': 2,
+ ...
+ }
+&gt;&gt;&gt; 
+&gt;&gt;&gt; all_unique_words_in_training_data = set([ j for i in yield_tokens(train_iter, 'en') for j in i ])
+&gt;&gt;&gt; all_unique_words_in_vocab = set(vocab_transform['en'].get_itos())
+&gt;&gt;&gt; all_unique_words_in_vocab.difference(all_unique_words_in_training_data)
+&gt;&gt;&gt; {'&lt;unk&gt;', '&lt;bos&gt;', '&lt;eos&gt;', '&lt;pad&gt;'}
+&gt;&gt;&gt; 
+&gt;&gt;&gt; print(len(vocab_transform['en'].get_stoi()))
+&gt;&gt;&gt; 10837
+&gt;&gt;&gt; d = vocab_transform['en'].get_stoi()
+&gt;&gt;&gt; print(min(d.values()), max(d.values()))
+&gt;&gt;&gt; 0 10836
+</code></pre>
+<p>In addition, the assigned value of each word in <code>vocab_transform</code> is related to the decreasing order of the occurrence frequency of the word in the dataset. We can verify this by below code. Noticing that the first 4 elements of <code>vocab_transform</code> are special symbols, so the value of the most frequently occurring word <strong>&quot;a&quot;</strong> is set to be 4, followed by words <strong>&quot;.&quot;</strong>, <strong>&quot;A&quot;,</strong> <strong>&quot;in&quot;</strong>, and <strong>&quot;the&quot;</strong> with the assigned values from 5 to 8 relatively.</p>
+<pre><code class="language-python">&gt;&gt;&gt; import pandas as pd
+&gt;&gt;&gt;
+&gt;&gt;&gt; all_words_in_training_data = [ j for i in yield_tokens(train_iter, 'en') for j in i ]
+&gt;&gt;&gt; df = pd.DataFrame(all_words_in_training_data, columns=['word'])
+&gt;&gt;&gt; word_freq = df.groupby([&quot;word&quot;])[&quot;word&quot;].count().reset_index(name=&quot;count&quot;).sort_values(by=[&quot;count&quot;], ascending=False)
+&gt;&gt;&gt; print(word_freq.head(5))
+     word  count
+1875    a  31707
+16      .  27623
+97      A  17458
+5816   in  14847
+9859  the   9923
+&gt;&gt;&gt; [ vocab_transform['en'].get_stoi()[i] for i in word_freq.head(5)['word'].tolist()]
+[4, 5, 6, 7, 8]
+</code></pre>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[Test]]></title>
+        <id>https://edwardxliu.github.io/post/test/</id>
+        <link href="https://edwardxliu.github.io/post/test/">
+        </link>
+        <updated>2022-03-25T06:35:27.000Z</updated>
+        <content type="html"><![CDATA[<p>this is for test usage</p>
+<h3 id="latex-公式">LaTeX 公式</h3>
+<p>可以创建行内公式，例如 <span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi mathvariant="normal">Γ</mi><mo>(</mo><mi>n</mi><mo>)</mo><mo>=</mo><mo>(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo>)</mo><mo>!</mo><mspace width="1em"/><mi mathvariant="normal">∀</mi><mi>n</mi><mo>∈</mo><mi mathvariant="double-struck">N</mi></mrow><annotation encoding="application/x-tex">\Gamma(n) = (n-1)!\quad\forall n\in\mathbb N</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">Γ</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span><span class="mclose">!</span><span class="mspace" style="margin-right:1em;"></span><span class="mord">∀</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68889em;vertical-align:0em;"></span><span class="mord mathbb">N</span></span></span></span>。或者块级公式：</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><mi>x</mi><mo>=</mo><mfrac><mrow><mo>−</mo><mi>b</mi><mo>±</mo><msqrt><mrow><msup><mi>b</mi><mn>2</mn></msup><mo>−</mo><mn>4</mn><mi>a</mi><mi>c</mi></mrow></msqrt></mrow><mrow><mn>2</mn><mi>a</mi></mrow></mfrac></mrow><annotation encoding="application/x-tex">x = \dfrac{-b \pm \sqrt{b^2 - 4ac}}{2a} 
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">x</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.276389em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.590389em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">2</span><span class="mord mathdefault">a</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">−</span><span class="mord mathdefault">b</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">±</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord sqrt"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.913389em;"><span class="svg-align" style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="mord" style="padding-left:0.833em;"><span class="mord"><span class="mord mathdefault">b</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.740108em;"><span style="top:-2.9890000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mord">4</span><span class="mord mathdefault">a</span><span class="mord mathdefault">c</span></span></span><span style="top:-2.873389em;"><span class="pstrut" style="height:3em;"></span><span class="hide-tail" style="min-width:0.853em;height:1.08em;"><svg width='400em' height='1.08em' viewBox='0 0 400000 1080' preserveAspectRatio='xMinYMin slice'><path d='M95,702c-2.7,0,-7.17,-2.7,-13.5,-8c-5.8,-5.3,-9.5,
+-10,-9.5,-14c0,-2,0.3,-3.3,1,-4c1.3,-2.7,23.83,-20.7,67.5,-54c44.2,-33.3,65.8,
+-50.3,66.5,-51c1.3,-1.3,3,-2,5,-2c4.7,0,8.7,3.3,12,10s173,378,173,378c0.7,0,
+35.3,-71,104,-213c68.7,-142,137.5,-285,206.5,-429c69,-144,104.5,-217.7,106.5,
+-221c5.3,-9.3,12,-14,20,-14H400000v40H845.2724s-225.272,467,-225.272,467
+s-235,486,-235,486c-2.7,4.7,-9,7,-19,7c-6,0,-10,-1,-12,-3s-194,-422,-194,-422
+s-65,47,-65,47z M834 80H400000v40H845z'/></svg></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.12661100000000003em;"><span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span></span></p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math><semantics><mrow><msub><mi mathvariant="bold">p</mi><mi>u</mi></msub><mo>=</mo><msubsup><mi mathvariant="bold">P</mi><mi>u</mi><mi>T</mi></msubsup><msubsup><mi>ν</mi><mi>u</mi><mi>U</mi></msubsup></mrow><annotation encoding="application/x-tex">\pmb p_u=\pmb P^T_uν^U_u 
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.6969222222222222em;vertical-align:-0.24414em;"></span><span class="mord"><span class="mord"><span class="mord"><span class="mord"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.43056em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="rlap"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="inner"><span class="mord"><span class="mord mathdefault">p</span></span></span><span class="fix"></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.19444em;"><span></span></span></span></span></span><span class="mord"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.4527822222222222em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="rlap"><span class="strut" style="height:0.625em;vertical-align:-0.17221777777777778em;"></span><span class="inner"><span class="mord"><span class="mspace" style="margin-right:0.022222222222222223em;"></span><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.4527822222222222em;"><span style="top:-3.0222222222222226em;"><span class="pstrut" style="height:3em;"></span><span class="mord text"><span class="mord mathdefault">p</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.17221777777777778em;"><span></span></span></span></span></span></span><span class="fix"></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.17221777777777778em;"><span></span></span></span></span></span><span class="mord"><span class="mspace" style="margin-right:0.044444444444444446em;"></span><span class="mord mathdefault">p</span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.057252em;"><span style="top:-2.4558600000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">u</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.24414em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.1837832222222222em;vertical-align:-0.247em;"></span><span class="mord"><span class="mord"><span class="mord"><span class="mord"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.68333em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="rlap"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="inner"><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">P</span></span></span><span class="fix"></span></span></span></span></span></span></span><span class="mord"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7055522222222222em;"><span style="top:-3em;"><span class="pstrut" style="height:3em;"></span><span class="rlap"><span class="strut" style="height:0.7055522222222222em;vertical-align:0em;"></span><span class="inner"><span class="mord"><span class="mspace" style="margin-right:0.022222222222222223em;"></span><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.7055522222222222em;"><span style="top:-3.022222222222222em;"><span class="pstrut" style="height:3em;"></span><span class="mord text"><span class="mord mathdefault" style="margin-right:0.13889em;">P</span></span></span></span></span></span></span></span><span class="fix"></span></span></span></span></span></span></span><span class="mord"><span class="mspace" style="margin-right:0.044444444444444446em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">P</span></span></span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.9367832222222222em;"><span style="top:-2.4530000000000003em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">u</span></span></span><span style="top:-3.1584522222222224em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.13889em;">T</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.06366em;">ν</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.8913309999999999em;"><span style="top:-2.4530000000000003em;margin-left:-0.06366em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">u</span></span></span><span style="top:-3.113em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight" style="margin-right:0.10903em;">U</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.247em;"><span></span></span></span></span></span></span></span></span></span></span></p>
+<p>\begin{equation}\label{eq:mti}<br>
+\begin{split}<br>
+Ttran_{i}<sup>{j,j+1}=\frac{R_{bd_{j,j+1}}</sup>{ij}}{AR_{bd_{j,j+1}}^{ij}}\times T_{ideal_tran}^{ij},\<br>
+v,u \in \left [ 1,|E_{S}| \right ],\<br>
+j,j+1 \in \left [ 1,|sfc_{i}| \right ],i \in \left [ 1,|SC| \right ].<br>
+\end{split}<br>
+\end{equation}</p>
+<h3 id="表格">表格</h3>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">Item</th>
+<th style="text-align:right">Value</th>
+<th style="text-align:center">Qty</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">Computer</td>
+<td style="text-align:right">1600 USD</td>
+<td style="text-align:center">5</td>
+</tr>
+<tr>
+<td style="text-align:left">Phone</td>
+<td style="text-align:right">12 USD</td>
+<td style="text-align:center">12</td>
+</tr>
+<tr>
+<td style="text-align:left">Pipe</td>
+<td style="text-align:right">1 USD</td>
+<td style="text-align:center">234</td>
+</tr>
+</tbody>
+</table>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[关于]]></title>
+        <id>https://edwardxliu.github.io/post/guan-yu/</id>
+        <link href="https://edwardxliu.github.io/post/guan-yu/">
+        </link>
+        <updated>2022-03-25T06:11:19.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>欢迎来到我的小站呀，很高兴遇见你！🤝</p>
+</blockquote>
+<h2 id="关于本站">🏠 关于本站</h2>
+<p>As the old saying goes, history is the great teacher, we will all someday be teachers ourselves because someday we will all be history too. We will someday be the ancients, and we can choose what that will mean</p>
+<h2 id="博主是谁">👨‍💻 博主是谁</h2>
+<ul>
+<li>EDWARD LIU/男/1989</li>
+<li>硕士/悉尼大学/计算机科学</li>
+<li>技术博客: https://edwardxliu.github.io/</li>
+<li>Github: https://github.com/edwardxliu</li>
+</ul>
+<h2 id="兴趣爱好">⛹ 兴趣爱好</h2>
+<ul>
+<li>神神叨叨</li>
+</ul>
+<h2 id="联系我呀">📬 联系我呀</h2>
+<ul>
+<li>Email: edward.ed.liu@gmail.com</li>
+</ul>
+]]></content>
+    </entry>
+</feed>

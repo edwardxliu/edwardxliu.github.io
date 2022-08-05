@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta content="yes" name="apple-mobile-web-app-capable" />
+<meta content="black" name="apple-mobile-web-app-status-bar-style" />
+<meta name="referrer" content="never">
+<meta name="keywords" content="">
+<meta name="description" content="欢迎访问[Edward&#39;s Blog]的个人博客">
+<meta name="author" content="kveln">
+<title>REAL-TIME OBJECT DETECTION ON HOLOLENS 2 | Edward&#39;s Blog</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link href="https://cdn.bootcss.com/font-awesome/5.11.2/css/all.min.css" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+<link
+  href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+  rel='stylesheet' type='text/css'>
+<link rel="alternate" type="application/rss+xml" title="REAL-TIME OBJECT DETECTION ON HOLOLENS 2 | Edward&#39;s Blog » Feed"
+  href="https://edwardxliu.github.io/atom.xml">
+<link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.15.10/build/styles/androidstudio.min.css">
+<link href="https://edwardxliu.github.io/styles/main.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/css/live2d.css">
+
+<script>hljs.initHighlightingOnLoad();</script>
+
+  <meta property="og:description" content="REAL-TIME OBJECT DETECTION ON HOLOLENS 2" />
+  <meta property="og:url" content="https://edwardxliu.github.io/post/video-test/" />
+  <meta property="og:locale" content="zh-CN" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Edward&#39;s Blog" />
+  <!-- <script src="../assets/styles/scripts/tocScript.js"></script> -->
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://edwardxliu.github.io">Edward&#39;s Blog</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="https://edwardxliu.github.io/post/guan-yu">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1659681269797"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+  <!-- Page Header -->
+  <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+  <div class="container">
+    <a class="navbar-brand" href="https://edwardxliu.github.io">Edward&#39;s Blog</a>
+    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+      data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+      aria-label="Toggle navigation">
+      Menu
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarResponsive">
+      <ul class="navbar-nav ml-auto">
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/">首页</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/archives">归档</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="/tags">标签</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          
+          <a class="nav-link" href="https://edwardxliu.github.io/post/guan-yu">关于</a>
+          
+        </li>
+        
+        <li class="nav-item">
+          <div class="gridea-search-container">
+            <form id="gridea-search-form" style="position: relative" data-update="1659681269797"
+              action="/search/index.html">
+              <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+              <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<header class="masthead" style="background-image: url('https://edwardxliu.github.io/media/images/home-bg.jpg')">
+  <div class="overlay"></div>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-8 col-md-10 mx-auto">
+        
+          <!-- 没Title为其他页面Header -->
+          
+            <!-- 没Title并且有headerType为Post：文章Header -->
+            <div class="post-heading">
+              <span class="tags">
+                
+              </span>
+              <h1>REAL-TIME OBJECT DETECTION ON HOLOLENS 2</h1>
+              <span class="meta">
+                Posted on
+                2022-05-18，6 min read
+              </span>
+            </div>
+          
+        
+      </div>
+    </div>
+  </div>
+</header>
+  <!-- Post Content -->
+  <article id="post-content-article">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto post-content-container">
+          
+          <img class="post-feature-header-image" src="https://raw.githubusercontent.com/edwardxliu/Picbed_PicGo/main/discoverearth_276325330_2747785908850341_670573588947533111_n.jpg" alt="封面图">
+          </img>
+          
+          <h1 id="development-experience-sharing">Development Experience Sharing</h1>
+<p>We've achieved 30fps real time object detection on HoloLens 2 with 60fps rendering rate. The final result and performance are presented in below video.</p>
+<iframe src="//player.bilibili.com/player.html?aid=639226756&bvid=BV1fY4y1z7Sy&cid=723021129&page=1" scrolling="no" align="center" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>
+<p>Since this is the first time we touch AR and we are not farmiliar with <strong>C#</strong> and <strong>Unity</strong>, we've tried a lot to fulfill the goal. Below list includes some tips and experiences which may be helpful.</p>
+<ol>
+<li>The <a href="https://docs.microsoft.com/en-us/windows/mixed-reality/develop/unity/tutorials/mr-azure-310">official tutorial</a> is for HoloLens 1 and we don't know how to adapt the code to be performed on HoloLens 2. Also, we don't know how to develop and deploy AI algorithms and directly execute them on HoloLens 2 since it doesn't have NVIDIA gpus (CUDA excluded) and its cpu is ARM-architectured. So we decide to make the AI algorithm running on a powerful external device and let the HoloLens to handle video capture and display the location results of objects predicted by AI algorithm. Therefore, establishing a robust and reliable communication connection between the HoloLens and the external device is necessary and important.</li>
+<li>The first way we tried is to convert each video frame captured by the HoloLens camera to a bitmap and then send the bitmap to our PC with NVIDIA gpus. A PC program receives the bitmap then predicts the names and locations of objects in that bitmap and sends those information back to HoloLens. However, the total running speed of this way is really bad. One reason we think is due to the waiting time of the information sending and receiving process on HoloLens. The other reason is that we use TCP as the transferring protocol because the correctness of each pixel in a video frame plays an important role on the prediction process of the AI model.</li>
+<li>We use YOLO as the detection algorithm cause it's fast.</li>
+<li>We tried to make the sending and receiving process asynchronous on the HoloLens, but the performance is not improved significantly.</li>
+<li>The official <a href="https://docs.microsoft.com/en-us/learn/paths/beginner-hololens-2-tutorials/">tutorial</a> about the fundamentals of HoloLens 2 development is really important. It guides us on how to establish, configure, develop, deploy and debug a <strong>Unity</strong> project to the HoloLens.</li>
+<li>Other guides such as <a href="https://arvrjourney.com/build-your-first-hololens-2-application-with-unity-and-mrtk-2-3-0-5f431d8cca8">link</a> are also helpful especially in how to set the <strong>spatial awareness mesh</strong> invisible.</li>
+<li>We tried to follow the suggestion <a href="https://docs.microsoft.com/en-us/answers/questions/579936/how-to-stream-video-to-hololens-2-with-low-latency.html">here</a> in order to increase the performance of the streaming process (e.g. using <a href="https://github.com/microsoft/MixedReality-WebRTC">MixedReality-WebRTC</a>) on HoloLens. However, the technology is a bit complicated for us. If you are interested in WebRTC, the building and deploying process can be refered <a href="https://microsoft.github.io/MixedReality-WebRTC/manual/building-core.html">here</a>, and the signal transferring is <a href="https://microsoft.github.io/MixedReality-WebRTC/manual/cs/cs-signaling.html">here</a>.</li>
+<li>We tried to use multi-threading technique to improve the performance. You can refer to <a href="https://docs.microsoft.com/en-us/dotnet/standard/threading/creating-threads-and-passing-data-at-start-time">here</a>.</li>
+<li>We tried to use <strong>async producer/consumer queue</strong> design pattern to improve the performance of the streaming process. You can refer to <a href="https://blog.stephencleary.com/2012/11/async-producerconsumer-queue-using.html">here</a>, <a href="https://makolyte.com/event-driven-dotnet-concurrent-producer-consumer-using-a-channel-as-a-non-blocking-async-queue/">here</a>, <a href="https://www.dotnetcurry.com/dotnetcore/1509/async-dotnetcore-pattern">here</a> and the official link is <a href="https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/how-to-implement-a-producer-consumer-dataflow-pattern">here</a>.</li>
+<li>We finally find out that the HoloLens actually has a live video stream. Thus, there is no need to send video stream to the PC anymore. Also, because of this, the bitmap conversion process and the corresponding TCP sending process are not required.</li>
+<li>Although <strong>UDP</strong> is not reliable and sometimes information is lost, we think it's informative enough to transfer the prediction results. This is because both YOLO and UDP are fast, one or two consecutive prediction-result loss won't effectively affect the rendering rate on HoloLens.</li>
+<li>It is quite important to know that the maximum rendering rate of Hololens 2 is 60 fps, which means a simple <strong>Unity</strong> program that has some basic <strong>Mixed Reality</strong> functions or draws some simple holograms will run at a maximum of 60 fps on Hololens 2. You may refer to the official links <a href="https://docs.microsoft.com/en-us/windows/mixed-reality/develop/advanced-concepts/understanding-performance-for-mixed-reality">here</a> and <a href="https://docs.microsoft.com/en-us/windows/mixed-reality/develop/advanced-concepts/hologram-stability">here</a>.</li>
+<li>It is also important to know that the camera frame rate of HoloLens 2 is 30 fps. Some people had discussed it <a href="https://github.com/microsoft/MixedReality-WebRTC/issues/800">here</a>. If you don't make any optimization, the program on HoloLens 2 will <strong>get capped at 30 fps</strong>, which we believe is intolerable. Therefore, since 60 fps is just a double of 30 fps, we let the HoloLens receives a UDP package in every two consecutive frames. This technique directly improves the rendering rate to 50-60 fps. Meanwhile, it does not bring negative impacts to the holograms generation and the real time object detection process.</li>
+<li>So far, we've throwed away the TCP video streaming process and the multi threading or asynchronous programing because the live streaming, YOLO and the mixed reality program are basically asynchronous and multi-processed. The only time consuming processes are the instantiate of the holograms and their maintenance.</li>
+<li>In terms of the instantiate, you may refer to <a href="https://forum.unity.com/threads/is-instantiate-bad-for-performance-unity-says-its-fast-forums-say-its-slow.182560/">here</a> and <a href="https://answers.unity.com/questions/196413/gameobject-pool-to-avoid-performance-issues-in-ins.html">here</a>.</li>
+<li>We tried to use <a href="https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.dictionary-2?view=net-6.0#code-try-4">Dictionary</a> class to manage the game objects created by Unity with the purpose of reducing the searching and matching time but it's not necessary.</li>
+<li>Hologram objects can also be stored in a array or a list. You may refer to <a href="https://stackoverflow.com/questions/454916/performance-of-arrays-vs-lists">here</a> and <a href="https://stackoverflow.com/questions/434761/array-versus-listt-when-to-use-which">here</a> to decide which one is better.</li>
+<li>Since the maintenance of those objects requires a lot of searching process, you may refer to <a href="https://stackoverflow.com/questions/46234289/how-to-increase-performance-of-foreach-loop">here</a>, <a href="https://stackoverflow.com/questions/36332255/how-to-increase-performance-of-many-foreach-loop">here</a> and <a href="https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/how-to-write-a-simple-parallel-for-loop">here</a> to optimize your <strong>for loops.</strong> we failed at using <strong>&quot;Parallel.For&quot;</strong> because we think the iteration and the creation or removing process from a same array or list are not allowed.</li>
+<li>Finally, when delopying the Unity project to Hololens, choose <strong>Release</strong> instead of <strong>Debug</strong> mode in <strong>Visual Studio</strong> will significantly improve the performance of the program on HoloLens.</li>
+</ol>
+
+          <div class="toc-container"><ul class="markdownIt-TOC">
+<li><a href="#development-experience-sharing">Development Experience Sharing</a></li>
+</ul>
+</div>
+          
+          <hr />
+          <p class="next-post">下一篇：
+            <a href="https://edwardxliu.github.io/post/sigmoid-function-optimization/">
+              <span class="post-title">
+                SIGMOID FUNCTION OPTIMIZATION&rarr;
+              </span>
+            </a>
+          </p>
+          
+          <div class="comment" style="text-align: center;">
+            
+
+            
+            
+            <link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
+<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+<div id="gitalk-container"></div>
+<script>
+  var gitalk = new Gitalk({
+    clientID: 'f738c647c12a9501e1b8',
+    clientSecret: '761bdc5f9bce460ba20b4faff8d769a6e3244d6d',
+    repo: 'edwardxliu.github.io',
+    owner: 'edwardxliu',
+    admin: ['edwardxliu'],
+    id: (location.pathname).substring(0, 49),      // Ensure uniqueness and length less than 50
+    distractionFreeMode: false  // Facebook-like distraction free mode
+  })
+  gitalk.render('gitalk-container')
+</script>
+
+            
+            
+            
+            
+          </div>
+        </div>
+      </div>
+  </article>
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-8 col-md-10 mx-auto">
+          <ul class="list-inline text-center">
+            
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+            
+              
+              <!-- <li class="list-inline-item">
+              <a href="https://edwardxliu.github.io/atom.xml" target="_blank">
+                <span class="fa-stack fa-lg">
+                  <i class="fas fa-circle fa-stack-2x"></i>
+                  <i class="fas fa-rss fa-stack-1x fa-inverse"></i>
+                </span>
+              </a>
+              </li> -->
+          </ul>
+          <p class="copyright text-muted">Copyright &copy;<span>Edward&#39;s Blog</span><br><a href="https://github.com/getgridea/gridea" class="Themeinfo">Powered by Gridea</a></p>
+        </div>
+      </div>
+    </div>
+   </footer>
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- <script src="https://edwardxliu.github.io/media/scripts/bootstrap.bundle.min.js"></script> -->
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://cdn.jsdelivr.net/gh/Alanrk/clean-cdn@1.0/scripts/clean-blog.min.js"></script>
+  <!-- <script src="https://edwardxliu.github.io/media/scripts/clean-blog.min.js"></script> -->
+  <script src="//instant.page/3.0.0" type="module" defer integrity="sha384-OeDn4XE77tdHo8pGtE1apMPmAipjoxUQ++eeJa6EtJCfHlvijigWiJpD7VDPWXV1"></script>
+  <style type="text/css">a.back_to_top{text-decoration:none;position:fixed;bottom:40px;right:30px;background:#f0f0f0;height:40px;width:40px;border-radius:50%;line-height:36px;font-size:18px;text-align:center;transition-duration:.5s;transition-propety:background-color;display:none}a.back_to_top span{color:#888}a.back_to_top:hover{cursor:pointer;background:#dfdfdf}a.back_to_top:hover span{color:#555}@media print,screen and(max-width:580px){.back_to_top{display:none!important}}</style>
+<a id="back_to_top" href="#" class="back_to_top">
+  <span>▲</span></a>
+<script>$(document).ready((function(_this) {
+    return function() {
+      var bt;
+      bt = $('#back_to_top');
+      if ($(document).width() > 480) {
+        $(window).scroll(function() {
+          var st;
+          st = $(window).scrollTop();
+          if (st > 30) {
+            return bt.css('display', 'block')
+          } else {
+            return bt.css('display', 'none')
+          }
+        });
+        return bt.click(function() {
+          $('body,html').animate({
+            scrollTop: 0
+          },
+          800);
+          return false
+        })
+      }
+    }
+  })(this));</script>
+  
+  <div id="landlord-parent">
+    <div id="landlord">
+        <div class="message" style="opacity:0"></div>
+        <canvas id="live2d" width="240" height="250" class="live2d"></canvas>
+    </div>
+</div>
+
+<script type="text/javascript">
+    if (/(iPhone|iPad|iPod|iOS|Android)/i.test(navigator.userAgent)) {
+        //移动端
+        console.log("------ 移动端");
+    } else {
+        console.log("------ PC端 " + navigator.userAgent);
+
+        addScript("https://cdn.jsdelivr.net/gh/850552586/ericamcdn@0.1/js/live2d.js", () => {
+            // 加载完成后再loadlive2d
+            loadlive2d("live2d", "https://edwardxliu.github.io/media/live2d/assets/hijiki.model.json");
+        });
+
+        var home_Path = "https://edwardxliu.github.io/";
+        addScript("https://edwardxliu.github.io/media/live2d/js/message.js", () => { });
+    }
+
+    // 插入js文件，完成后callback
+    function addScript(jsfile, callback) {
+        var landlord_parent = document.getElementById("landlord-parent");
+        var script = document.createElement("script");
+        script.type = "text/javascript";
+        script.src = jsfile;
+        landlord_parent.appendChild(script);
+        script.onload = script.onreadystatechange = function () {
+            if (!this.readyState || this.readyState === "loaded" || this.readyState === "complete") {
+                script.onload = script.onreadystatechange = null;
+                if (callback && typeof callback == "function") {
+                    callback(); //window[callback]();如果传递字符串过来 调用window['函数名']() 调用方法
+                }
+            }
+        };
+    }
+</script>
+  
+  <script src="https://edwardxliu.github.io/media/scripts/tocScript.js"></script>
+</body>
+
+</html>
